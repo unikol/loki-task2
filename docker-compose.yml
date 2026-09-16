@@ -9,10 +9,20 @@ services:
       LOG_PATH: /var/log/webapp/app.log
     volumes:
       - weblogs:/var/log/webapp
+    healthcheck:
+      test: [ "CMD", "wget", "-qO-", "http://localhost:3000/" ]
+      interval: 2s
+      timeout: 2s
+      retries: 10
 
   loki:
     image: grafana/loki:2.9.4
     container_name: loki
+    healthcheck:
+      test: [ "CMD", "wget", "-qO-", "http://localhost:3100/ready" ]
+      interval: 2s
+      timeout: 2s
+      retries: 10
 
   promtail:
     image: grafana/promtail:2.9.4
@@ -22,8 +32,10 @@ services:
       - ./promtail-config.yml:/etc/promtail/config.yml
     command: -config.file=/etc/promtail/config.yml
     depends_on:
-      - loki
-      - webapp
+      loki:
+        condition: service_healthy
+      webapp:
+        condition: service_healthy
 
   grafana:
     image: grafana/grafana:10.4.2
@@ -36,7 +48,8 @@ services:
     volumes:
       - ./grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
     depends_on:
-      - loki
+      loki:
+        condition: service_healthy
 
 volumes:
   weblogs:
