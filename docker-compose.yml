@@ -1,1 +1,41 @@
+services:
+  webapp:
+    build: .
+    container_name: webapp
+    ports:
+      - "8080:3000"
+    environment:
+      PORT: 3000
+      LOG_PATH: /var/log/webapp/app.log
+    volumes:
+      - weblogs:/var/log/webapp
 
+  loki:
+    image: grafana/loki:2.9.4
+    container_name: loki
+
+  promtail:
+    image: grafana/promtail:2.9.4
+    container_name: promtail
+    volumes:
+      - weblogs:/var/log/webapp
+      - ./promtail-config.yml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+
+  grafana:
+    image: grafana/grafana:10.4.2
+    container_name: grafana
+    ports:
+      - "9090:3000"
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+    volumes:
+      - ./grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+    depends_on:
+      - loki
+
+volumes:
+  weblogs:
