@@ -5,6 +5,9 @@ server:
 positions:
   filename: /tmp/positions.yaml
 
+target_config:
+  sync_period: 1s
+
 clients:
   - url: http://loki:3100/loki/api/v1/push
 
