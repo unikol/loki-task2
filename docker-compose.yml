@@ -5,12 +5,12 @@ services:
     ports:
       - "8080:3000"
     environment:
-      PORT: 3000
+      PORT: "3000"
       LOG_PATH: /var/log/webapp/app.log
     volumes:
       - weblogs:/var/log/webapp
     healthcheck:
-      test: [ "CMD", "wget", "-qO-", "http://localhost:3000/" ]
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/"]
       interval: 2s
       timeout: 2s
       retries: 10
@@ -19,23 +19,23 @@ services:
     image: grafana/loki:2.9.4
     container_name: loki
     healthcheck:
-      test: [ "CMD", "wget", "-qO-", "http://localhost:3100/ready" ]
+      test: ["CMD", "wget", "-qO-", "http://localhost:3100/ready"]
       interval: 2s
       timeout: 2s
-      retries: 10
+      retries: 15
 
   promtail:
     image: grafana/promtail:2.9.4
     container_name: promtail
     volumes:
-      - weblogs:/var/log/webapp
-      - ./promtail-config.yml:/etc/promtail/config.yml
+      - weblogs:/var/log/webapp:ro
+      - ./promtail-config.yml:/etc/promtail/config.yml:ro
     command: -config.file=/etc/promtail/config.yml
     depends_on:
       loki:
-        condition: service_healthy
+        condition: service_started
       webapp:
-        condition: service_healthy
+        condition: service_started
 
   grafana:
     image: grafana/grafana:10.4.2
@@ -46,7 +46,7 @@ services:
       GF_AUTH_ANONYMOUS_ENABLED: "true"
       GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
     volumes:
-      - ./grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ./grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
     depends_on:
       loki:
         condition: service_healthy
