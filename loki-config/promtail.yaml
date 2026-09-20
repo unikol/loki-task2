@@ -4,22 +4,19 @@ server:
 
 positions:
   filename: /tmp/positions.yaml
-  sync_period: 1s
 
 clients:
   - url: http://loki:3100/loki/api/v1/push
-    batchwait: 100ms
-    batchsize: 102400
-    backoff_config:
-      min_period: 100ms
-      max_period: 1s
-      max_retries: 20
 
 scrape_configs:
-  - job_name: webapp
+  - job_name: webapp_logs
+    pipeline_stages:
+      - multiline:
+          firstline: '^\{'
     static_configs:
       - targets:
           - localhost
         labels:
           webapp: varlogs
+          host: localhost
           __path__: /var/log/webapp/*.log

@@ -1,9 +1,8 @@
 package main
 
 import (
-	"os"
-
 	"webapp/pkg/config"
+	"webapp/pkg/logger"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -11,12 +10,13 @@ import (
 
 func main() {
 	port := config.GetEnv("PORT", "3000")
-	logPath := config.GetEnv("LOG_PATH", "/var/log/webapp/app.log")
+	logPath := config.GetEnv("LOG_PATH", "/app/log/app.log")
 
-	logFile, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	logFile, err := logger.CreateLogger(logPath)
 	if err != nil {
 		panic(err)
 	}
+	defer logFile.Close()
 
 	e := echo.New()
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
