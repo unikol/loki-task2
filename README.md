@@ -1,3 +1,4 @@
+[![Loki Task](https://github.com/unikol/loki-task2/actions/workflows/main.yml/badge.svg)](https://github.com/unikol/loki-task2/actions/workflows/main.yml)
 # Task on the topic Loki
 
 Here we have a web application written in the [Go Echo framework](https://echo.labstack.com/). The task is to provide logging for the application, containerize it, and enable log aggregation using **Grafana Loki**. Please write a `Dockerfile` and configure the `docker-compose.yml` file. The services should be described as follows in the `docker-compose.yml` file:
